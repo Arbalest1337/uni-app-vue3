@@ -13,7 +13,7 @@
 
 ### 主要开发依赖
 
--   [uni-app] - 多平台跨端框架
+-   [uni-app] - 基于vue的多平台跨端框架
 -   [vite] - 开发与构建工具
 -   [husky] - git hooks 工具
 -   [commitlint] - git commit 格式校验
@@ -42,8 +42,11 @@
 安装依赖
 npm install
 
-本地启动
-npm run dev
+各平台本地开发
+npm run dev:平台名称
+
+各平台生产打包
+npm run build:平台名称
 
 格式检查
 npm run lint
