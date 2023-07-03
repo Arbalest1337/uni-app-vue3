@@ -1,15 +1,12 @@
 import axios from 'axios'
-import type {
-    AxiosRequestConfig,
-    AxiosRequestHeaders,
-    InternalAxiosRequestConfig,
-    Canceler
-} from 'axios'
+import mpAdapter from 'axios-miniprogram-adapter'
+axios.defaults.adapter = mpAdapter as any
+
+import type { AxiosRequestConfig, AxiosRequestHeaders, Canceler } from 'axios'
 import config, { TOKEN_KEY } from '@/config'
 import { camelToSnake, snakeToCamel } from '@/utils/transfer'
 import { useUserStore } from '@/store/user'
 import { Toast, Dialog } from '@/utils'
-const userStore = useUserStore()
 
 // 取消请求
 const cancelerMap = new Map<string, Canceler>()
@@ -28,7 +25,7 @@ const removeAllCanceler = () => {
 const errorHandle = (code: number, message: string) => {
     if ([401, 403].includes(code)) {
         removeAllCanceler()
-        userStore.logout()
+        useUserStore().logout()
         Dialog({
             title: '登录失效',
             content: '登录失效，请重新登录',
@@ -64,12 +61,12 @@ const request = (cfg: RequestExtraConfig) => {
 
     // 请求拦截
     service.interceptors.request.use(
-        (config: InternalAxiosRequestConfig) => {
+        config => {
             config.cancelToken = createCanceler(config)
             if (extraConfig.needToken) {
                 config.headers = {
                     ...config.headers,
-                    [TOKEN_KEY]: userStore.token
+                    [TOKEN_KEY]: useUserStore().token
                 } as AxiosRequestHeaders
             }
             if (extraConfig.paramsTransform) {
@@ -87,7 +84,7 @@ const request = (cfg: RequestExtraConfig) => {
     // 响应拦截
     service.interceptors.response.use(
         response => {
-            const { 'content-type': contentType } = response.headers
+            const { 'Content-Type': contentType } = response.headers
             if (contentType.indexOf('json') !== -1) {
                 const { success, code, data, message } = response.data
                 if (!success) {
